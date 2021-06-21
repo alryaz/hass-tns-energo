@@ -150,7 +150,7 @@ class TNSEnergoConfigFlow(ConfigFlow, domain=DOMAIN):
                 ),
             )
 
-        if user_input[CONF_ACCOUNTS]:
+        if user_input.get(CONF_ACCOUNTS):
             current_config[CONF_DEFAULT] = False
             current_config[CONF_ACCOUNTS] = dict.fromkeys(user_input[CONF_ACCOUNTS], True)
 
