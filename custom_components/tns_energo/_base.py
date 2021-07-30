@@ -431,6 +431,7 @@ class TNSEnergoEntity(Entity, Generic[_TAccount]):
     async def async_added_to_hass(self) -> None:
         _LOGGER.info(self.log_prefix + "Adding to HomeAssistant")
         self.updater_restart()
+        self.register_supported_services()
 
     async def async_will_remove_from_hass(self) -> None:
         _LOGGER.info(self.log_prefix + "Removing from HomeAssistant")
@@ -568,6 +569,8 @@ class TNSEnergoEntity(Entity, Generic[_TAccount]):
 
             if result:
                 for service, schema in services.items():
+                    service_name = "async_service_" + service
+                    _LOGGER.debug("Registering service: %s", service_name)
                     self.platform.async_register_entity_service(
-                        service, schema, "async_service_" + service, features
+                        service, schema, service_name, features
                     )

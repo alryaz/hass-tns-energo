@@ -1,7 +1,8 @@
 _ЛК &#xab;ТНС Энерго&#xbb;_ для _Home Assistant_
 ==================================================
 
-> Предоставление информации о текущем состоянии ваших аккаунтов в ЛК ТНС Энерго.
+> Предоставление информации о текущем состоянии ваших лицевых счетов в ЛК ТНС Энерго.
+> Передача показаний по счётчикам.
 >
 >[![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/custom-components/hacs)
 > [![Лицензия](https://img.shields.io/badge/%D0%9B%D0%B8%D1%86%D0%B5%D0%BD%D0%B7%D0%B8%D1%8F-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -10,9 +11,24 @@ _ЛК &#xab;ТНС Энерго&#xbb;_ для _Home Assistant_
 >[![Пожертвование Yandex](https://img.shields.io/badge/%D0%9F%D0%BE%D0%B6%D0%B5%D1%80%D1%82%D0%B2%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5-Yandex-red.svg)](https://money.yandex.ru/to/410012369233217)
 > [![Пожертвование PayPal](https://img.shields.io/badge/%D0%9F%D0%BE%D0%B6%D0%B5%D1%80%D1%82%D0%B2%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5-Paypal-blueviolet.svg)](https://www.paypal.me/alryaz)
 
-## Введение
+## Скриншоты
 
-> @ TODO @
+<details>
+  <summary>Информация о лицевом счёте</summary> 
+  <img src="https://raw.githubusercontent.com/alryaz/hass-tns-energo/main/images/account.png" alt="Скриншот: Информация о лицевом счёте">
+</details>
+<details>
+  <summary>Последний зарегистрированный платёж</summary> 
+  <img src="https://raw.githubusercontent.com/alryaz/hass-tns-energo/main/images/last_payment.png" alt="Скриншот: Последний зарегистрированный платёж">
+</details>
+<details>
+  <summary>Счётчик коммунальных услуг</summary> 
+  <img src="https://raw.githubusercontent.com/alryaz/hass-lkcomu-interrao/main/images/meter.png" alt="Скриншот: Счётчик коммунальных услуг">
+</details>
+<details>
+  <summary>Служба отправки показаний</summary> 
+  <img src="https://raw.githubusercontent.com/alryaz/hass-lkcomu-interrao/main/images/push_indications.png" alt="Скриншот: Служба отправки показаний">
+</details>
 
 ## Установка
 
