@@ -25,11 +25,11 @@ _ЛК &#xab;ТНС Энерго&#xbb;_ для _Home Assistant_
 </details>
 <details>
   <summary>Счётчик коммунальных услуг</summary> 
-  <img src="https://raw.githubusercontent.com/alryaz/hass-lkcomu-interrao/main/images/meter.png" alt="Скриншот: Счётчик коммунальных услуг">
+  <img src="https://raw.githubusercontent.com/alryaz/hass-tns-energo/main/images/meter.png" alt="Скриншот: Счётчик коммунальных услуг">
 </details>
 <details>
   <summary>Служба отправки показаний</summary> 
-  <img src="https://raw.githubusercontent.com/alryaz/hass-lkcomu-interrao/main/images/push_indications.png" alt="Скриншот: Служба отправки показаний">
+  <img src="https://raw.githubusercontent.com/alryaz/hass-tns-energo/main/images/push_indications.png" alt="Скриншот: Служба отправки показаний">
 </details>
 
 ## Установка
