@@ -183,7 +183,7 @@ target:
 ... или, с помощью именованного массива:
 
 ```yaml
-service: tns_energo.calculate_indications
+service: tns_energo.push_indications
 data:
   indications:
     t1: 123
@@ -196,7 +196,7 @@ target:
 ... или, с помощью списка:
 
 ```yaml
-service: tns_energo.calculate_indications
+service: tns_energo.push_indications
 data:
   indications: [123, 456, 789]
 target:
@@ -214,7 +214,7 @@ target:
   отправлены<sup>1</sup>.
   
 ```yaml
-service: tns_energo.calculate_indications
+service: tns_energo.push_indications
 data_template:
   indications: [123, 456, 789]
   ignore_indications: true
@@ -235,7 +235,7 @@ target:
 а не _123_, _456_ и _789_. 
   
 ```yaml
-service: tns_energo.calculate_indications
+service: tns_energo.push_indications
 data_template:
   indications: [123, 456, 789]
   incremental: true
