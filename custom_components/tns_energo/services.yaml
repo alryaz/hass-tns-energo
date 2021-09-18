@@ -2,6 +2,7 @@ push_indications:
   description: 'Передать показания в личный кабинет'
   target:
     entity:
+      integration: tns_energo
       device_class: tns_energo_meter
   fields:
     indications:
@@ -41,6 +42,7 @@ calculate_indications:
   description: 'Подсчитать начисления по передаваемым показаниям'
   target:
     entity:
+      integration: tns_energo
       device_class: tns_energo_meter
   fields:
     indications:
@@ -81,6 +83,7 @@ set_description:
   description: "Задать комментарий к лицевому счёту. Пустой параметр `description` (или его упущение) очистит описание к лицевому счёту."
   target:
     entity:
+      integration: tns_energo
       device_class: tns_energo_account
   fields:
     description:
@@ -95,6 +98,7 @@ get_payments:
   description: "Получить перечень платежей, связанных с лицевым счётом, которые находятся внутри заданного периода"
   target:
     entity:
+      integration: tns_energo
       device_class: tns_energo_account
   fields:
     start:
@@ -116,6 +120,7 @@ get_indications:
   description: "Получить перечень квитанций, связанных с счётчиком (-ами), которые находятся внутри заданного периода"
   target:
     entity:
+      integration: tns_energo
       device_class: tns_energo_meter
   fields:
     start:

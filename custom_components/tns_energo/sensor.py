@@ -620,6 +620,10 @@ class TNSEnergoLastPayment(TNSEnergoEntity):
         return self._last_payment.amount
 
     @property
+    def unit_of_measurement(self) -> str:
+        return "руб."
+
+    @property
     def icon(self) -> str:
         return "mdi:cash-multiple"
 
@@ -635,7 +639,7 @@ class TNSEnergoLastPayment(TNSEnergoEntity):
 
             self._handle_dev_presentation(
                 attributes,
-                (ATTR_PAID_AT),
+                (ATTR_PAID_AT,),
                 (ATTR_AMOUNT, ATTR_SOURCE),
             )
 

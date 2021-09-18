@@ -56,13 +56,13 @@ from custom_components.tns_energo.const import (
     DATA_ENTITIES,
     DATA_FINAL_CONFIG,
     DATA_UPDATE_DELEGATORS,
+    DOMAIN,
     FORMAT_VAR_ACCOUNT_CODE,
     FORMAT_VAR_ACCOUNT_ID,
     FORMAT_VAR_CODE,
     FORMAT_VAR_ID,
     SUPPORTED_PLATFORMS,
 )
-from tns_energo_api.exceptions import TNSEnergoException
 
 if TYPE_CHECKING:
     from tns_energo_api import Account, TNSEnergoAPI
@@ -326,6 +326,22 @@ class TNSEnergoEntity(Entity, Generic[_TAccount]):
         self._account_config: ConfigType = account_config
         self._entity_updater = None
 
+    @property
+    def api_hostname(self) -> str:
+        return urlparse(self._account.api.lk_region_url).netloc
+
+    @property
+    def device_info(self) -> Dict[str, Any]:
+        account_object = self._account
+
+        return {
+            "name": f"№ {account_object.code}",
+            "identifiers": {(DOMAIN, f"{account_object.api.region}__{account_object.code}")},
+            "manufacturer": "TNS Energo",
+            "model": self.api_hostname,
+            "suggested_area": account_object.address,
+        }
+
     def _handle_dev_presentation(
         self,
         mapping: MutableMapping[str, Any],
@@ -388,8 +404,9 @@ class TNSEnergoEntity(Entity, Generic[_TAccount]):
         """Return the attribute(s) of the sensor"""
 
         attributes = {
-            ATTR_ATTRIBUTION: (ATTRIBUTION_RU if IS_IN_RUSSIA else ATTRIBUTION_EN)
-            % urlparse(self._account.api.lk_region_url).netloc,
+            ATTR_ATTRIBUTION: (
+                (ATTRIBUTION_RU if IS_IN_RUSSIA else ATTRIBUTION_EN) % self.api_hostname
+            ),
             **(self.sensor_related_attributes or {}),
         }
 
