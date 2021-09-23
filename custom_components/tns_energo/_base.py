@@ -339,7 +339,7 @@ class TNSEnergoEntity(Entity, Generic[_TAccount]):
             "identifiers": {(DOMAIN, f"{account_object.api.region}__{account_object.code}")},
             "manufacturer": "TNS Energo",
             "model": self.api_hostname,
-            "suggested_area": account_object.address,
+            # "suggested_area": account_object.address,
         }
 
     def _handle_dev_presentation(
@@ -478,7 +478,10 @@ class TNSEnergoEntity(Entity, Generic[_TAccount]):
 
     def updater_stop(self) -> None:
         if self._entity_updater is not None:
-            _LOGGER.debug(self.log_prefix + "Stopping updater")
+            _LOGGER.debug(
+                self.log_prefix
+                + ("Остановка планировщика обновлений" if IS_IN_RUSSIA else "Stopping updater")
+            )
             self._entity_updater()
             self._entity_updater = None
 
@@ -490,7 +493,14 @@ class TNSEnergoEntity(Entity, Generic[_TAccount]):
 
         async def _update_entity(*_):
             nonlocal self
-            _LOGGER.debug(log_prefix + f"Executing updater on interval")
+            _LOGGER.debug(
+                log_prefix
+                + (
+                    "Выполнение запланированной задачи обновления"
+                    if IS_IN_RUSSIA
+                    else "Executing planned update task"
+                )
+            )
             await self.async_update_ha_state(force_refresh=True)
 
         _LOGGER.debug(

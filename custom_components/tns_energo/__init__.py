@@ -168,7 +168,10 @@ async def async_setup_entry(hass: HomeAssistantType, config_entry: config_entrie
     log_prefix = f"[{mask_username(username)}] "
     hass_data = hass.data
 
-    _LOGGER.debug(log_prefix + "Setting up config entry")
+    _LOGGER.debug(
+        log_prefix
+        + ("Настройка конфигурационной записи" if IS_IN_RUSSIA else "Setting up config entry")
+    )
 
     # Source full configuration
     if config_entry.source == config_entries.SOURCE_IMPORT:
