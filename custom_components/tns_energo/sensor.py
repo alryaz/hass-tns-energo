@@ -178,7 +178,11 @@ class TNSEnergoAccount(TNSEnergoEntity):
     @property
     def state(self) -> Union[float, str]:
         balance = self._account.balance
-        return STATE_UNKNOWN if balance is None else balance
+        if balance is None:
+            return STATE_UNKNOWN
+        if balance == 0.0:
+            return 0.0
+        return balance
 
     @property
     def icon(self) -> str:
