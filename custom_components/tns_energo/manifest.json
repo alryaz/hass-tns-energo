@@ -9,7 +9,7 @@
         "@alryaz"
     ],
     "requirements": [
-        "tns-energo-api==0.0.2"
+        "tns-energo-api==0.0.3"
     ],
     "config_flow": true,
     "iot_class": "cloud_polling"
