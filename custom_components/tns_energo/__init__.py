@@ -41,6 +41,7 @@ from custom_components.tns_energo.const import (
     DOMAIN,
     SUPPORTED_PLATFORMS,
 )
+from tns_energo_api.exceptions import EmptyResultException
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -222,31 +223,81 @@ async def async_setup_entry(hass: HomeAssistantType, config_entry: config_entrie
     from tns_energo_api import TNSEnergoAPI
     from tns_energo_api.exceptions import TNSEnergoException
 
+    api_object = TNSEnergoAPI(
+        username=username,
+        password=user_cfg[CONF_PASSWORD],
+    )
+
     try:
-        api_object = TNSEnergoAPI(
-            username=username,
-            password=user_cfg[CONF_PASSWORD],
-        )
+        try:
+            await api_object.async_authenticate()
 
-        await api_object.async_authenticate()
+        except TNSEnergoException as e:
+            _LOGGER.error(
+                log_prefix
+                + ("Невозможно выполнить авторизацию" if IS_IN_RUSSIA else "Error authenticating")
+                + ": "
+                + repr(e)
+            )
+            raise ConfigEntryNotReady
 
-        # Fetch all accounts
-        accounts = await api_object.async_get_accounts_list()
+        accounts = None
+        for i in range(3):
+            _LOGGER.debug(
+                log_prefix
+                + (
+                    "Ожидание перед запросом лицевых счетов"
+                    if IS_IN_RUSSIA
+                    else "Waiting before requesting accounts"
+                )
+            )
+            await asyncio.sleep(5)
 
-    except TNSEnergoException as e:
-        _LOGGER.error(
-            log_prefix
-            + ("Невозможно выполнить авторизацию" if IS_IN_RUSSIA else "Error authenticating")
-            + ": "
-            + repr(e)
-        )
-        raise ConfigEntryNotReady
+            try:
+                accounts = await api_object.async_get_accounts_list()
+            except EmptyResultException:
+                _LOGGER.warning(
+                    log_prefix
+                    + (
+                        "Получен пустой ответ на запрос лицевых счетов"
+                        if IS_IN_RUSSIA
+                        else "Received empty response to accounts request"
+                    )
+                )
+            except TNSEnergoException:
+                log_message = (
+                    (
+                        "Ошибка получения данных о лицевых счетах"
+                        if IS_IN_RUSSIA
+                        else "Error retrieving account information"
+                    )
+                    + ": "
+                    + str(e)
+                )
+                _LOGGER.error(log_prefix + log_message)
+                raise ConfigEntryNotReady(log_message)
+            else:
+                break
+
+        if accounts is None:
+            log_message = (
+                "Невозможно получить данные о лицевых счетах"
+                if IS_IN_RUSSIA
+                else "Unable to fetch accounts data"
+            )
+            _LOGGER.error(log_prefix + log_message)
+            raise ConfigEntryNotReady(log_message)
+
+    except BaseException:
+        await api_object.async_close()
+        raise
 
     if not accounts:
         # Cancel setup because no accounts provided
         _LOGGER.warning(
             log_prefix + ("Лицевые счета не найдены" if IS_IN_RUSSIA else "No accounts found")
         )
+        await api_object.async_close()
         return False
 
     _LOGGER.debug(

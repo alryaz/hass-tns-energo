@@ -11,7 +11,8 @@ from homeassistant.helpers.entity_platform import EntityPlatform
 from homeassistant.helpers.typing import HomeAssistantType
 
 from custom_components.tns_energo.const import DOMAIN
-from tns_energo_api import TNSEnergoAPI, TNSEnergoException
+from tns_energo_api import TNSEnergoAPI
+from tns_energo_api.exceptions import EmptyResultException, TNSEnergoException
 
 
 def _make_log_prefix(
@@ -63,6 +64,9 @@ async def with_auto_auth(
     api: "TNSEnergoAPI", async_getter: Callable[..., Coroutine[Any, Any, _RT]], *args, **kwargs
 ) -> _RT:
     try:
+        return await async_getter(*args, **kwargs)
+    except EmptyResultException:
+        # Attempt once more
         return await async_getter(*args, **kwargs)
     except TNSEnergoException:
         await api.async_authenticate()

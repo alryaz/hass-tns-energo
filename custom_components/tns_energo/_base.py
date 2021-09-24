@@ -141,9 +141,6 @@ DEV_CLASSES_PROCESSED = set()
 
 async def async_refresh_api_data(hass: HomeAssistantType, config_entry: ConfigEntry):
     entry_id = config_entry.entry_id
-    api: "TNSEnergoAPI" = hass.data[DATA_API_OBJECTS][entry_id]
-
-    accounts = await with_auto_auth(api, api.async_get_accounts_list)
 
     update_delegators: UpdateDelegatorsDataType = hass.data[DATA_UPDATE_DELEGATORS][entry_id]
 
@@ -192,6 +189,9 @@ async def async_refresh_api_data(hass: HomeAssistantType, config_entry: ConfigEn
 
     accounts_config = final_config.get(CONF_ACCOUNTS) or {}
     account_default_config = final_config[CONF_DEFAULT]
+
+    api: "TNSEnergoAPI" = hass.data[DATA_API_OBJECTS][entry_id]
+    accounts = await with_auto_auth(api, api.async_get_accounts_list)
 
     for account in accounts:
         account_config = accounts_config.get(account.code)
