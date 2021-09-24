@@ -51,7 +51,6 @@ tns_energo:
   password: super_password
 ```
 
-
 ### Описание конфигурационной схемы
 ```yaml
 # Файл `configuration.yaml`
@@ -152,7 +151,44 @@ tns_energo:
 | `data`.`ignore_period` | Игнорировать период передачи показаний |
 | `data`.`ignore_indications` | Игнорировать ограничения по значениям |
 
-#### Примеры вызова службы
+#### Пример автоматизации
+```yaml
+# Файл configuration.yaml
+
+automation:
+  - alias: Send elecric indications
+    description: -|
+      Отправлять показания по электричеству
+      в 14 часов каждый 25-й день месяца'
+    trigger:
+      - platform: time
+        at: '14:00'
+    condition:
+      - condition: template
+        value_template: {{ now().day == 25 }}
+    action:
+      - service: tns_energo.push_indications
+        target:
+          entity_id: sensor.tns_yar_1111111111111_meter_11111111
+        data:
+          indications: {{ states('sensor.pzem_004t_v3_energy') }}
+```
+
+#### Пример скрипта
+```yaml
+# Файл configuration.yaml
+
+script:
+  send_electric_indications:
+    sequence:
+      - service: tns_energo.push_indications
+        target:
+          entity_id: sensor.tns_yar_1111111111111_meter_11111111
+        data:
+          indications: {{ states('sensor.pzem_004t_v3_energy') }}
+```
+
+#### Примеры параметров службы
 
 ##### 1. Обычная передача показаний
 
