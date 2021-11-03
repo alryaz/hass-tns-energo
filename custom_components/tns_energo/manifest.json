@@ -4,7 +4,7 @@
     "documentation": "https://github.com/alryaz/hass-tns-energo",
     "issue_tracker": "https://github.com/alryaz/hass-tns-energo/issues",
     "dependencies": [],
-    "version": "0.0.6",
+    "version": "0.1.0",
     "codeowners": [
         "@alryaz"
     ],
