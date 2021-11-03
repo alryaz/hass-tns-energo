@@ -12,7 +12,6 @@ from typing import (
     Dict,
     Final,
     Hashable,
-    Iterable,
     List,
     Mapping,
     Optional,
@@ -23,8 +22,6 @@ from typing import (
 
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
-
-from homeassistant.components import persistent_notification
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
     ATTR_ENTITY_ID,
@@ -59,7 +56,6 @@ from custom_components.tns_energo.const import (
     ATTR_LIVING_AREA,
     ATTR_METER_CODE,
     ATTR_METER_MODEL,
-    ATTR_NOTIFICATION,
     ATTR_PAID_AT,
     ATTR_RESULT,
     ATTR_SOURCE,
@@ -96,21 +92,25 @@ INDICATIONS_SEQUENCE_SCHEMA = vol.All(
 )
 
 
-CALCULATE_PUSH_INDICATIONS_SCHEMA = {
-    vol.Required(ATTR_INDICATIONS): vol.Any(
-        vol.All(
-            cv.string, lambda x: list(map(str.strip, x.split(","))), INDICATIONS_SEQUENCE_SCHEMA
-        ),
-        INDICATIONS_MAPPING_SCHEMA,
-        INDICATIONS_SEQUENCE_SCHEMA,
+CALCULATE_PUSH_INDICATIONS_SCHEMA = vol.All(
+    cv.make_entity_service_schema(
+        {
+            vol.Required(ATTR_INDICATIONS): vol.Any(
+                vol.All(
+                    cv.string,
+                    lambda x: list(map(str.strip, x.split(","))),
+                    INDICATIONS_SEQUENCE_SCHEMA,
+                ),
+                INDICATIONS_MAPPING_SCHEMA,
+                INDICATIONS_SEQUENCE_SCHEMA,
+            ),
+            vol.Optional(ATTR_IGNORE_INDICATIONS, default=False): cv.boolean,
+            vol.Optional(ATTR_INCREMENTAL, default=False): cv.boolean,
+            vol.Optional("notification"): lambda x: x,
+        }
     ),
-    vol.Optional(ATTR_IGNORE_INDICATIONS, default=False): cv.boolean,
-    vol.Optional(ATTR_INCREMENTAL, default=False): cv.boolean,
-    vol.Optional(ATTR_NOTIFICATION, default=False): vol.Any(
-        cv.boolean,
-        persistent_notification.SCHEMA_SERVICE_CREATE,
-    ),
-}
+    cv.deprecated("notification"),
+)
 
 SERVICE_PUSH_INDICATIONS: Final = "push_indications"
 SERVICE_PUSH_INDICATIONS_SCHEMA: Final = CALCULATE_PUSH_INDICATIONS_SCHEMA
@@ -186,7 +186,7 @@ class TNSEnergoAccount(TNSEnergoEntity):
 
     @property
     def icon(self) -> str:
-        return "mdi:flash-circle"
+        return "mdi:lightning-bolt-circle"
 
     @property
     def unit_of_measurement(self) -> Optional[str]:
