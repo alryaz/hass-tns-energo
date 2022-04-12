@@ -7,6 +7,6 @@
     "sensor"
   ],
   "country": "ru",
-  "homeassistant": "2021.4.6",
+  "homeassistant": "2022.3.0",
   "iot_class": "Cloud Polling"
 }

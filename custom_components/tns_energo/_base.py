@@ -301,7 +301,6 @@ class NameFormatDict(dict):
 _TData = TypeVar("_TData")
 _TAccount = TypeVar("_TAccount", bound="Account")
 
-
 SupportedServicesType = Mapping[
     Optional[Tuple[type, SupportsInt]],
     Mapping[str, Union[dict, Callable[[dict], dict]]],
@@ -312,6 +311,8 @@ class TNSEnergoEntity(Entity, Generic[_TAccount]):
     config_key: ClassVar[str] = NotImplemented
 
     _supported_services: ClassVar[SupportedServicesType] = {}
+
+    _attr_should_poll = False
 
     @property
     def entity_id_prefix(self) -> str:
@@ -390,14 +391,6 @@ class TNSEnergoEntity(Entity, Generic[_TAccount]):
     #################################################################################
     # Base overrides
     #################################################################################
-
-    @property
-    def should_poll(self) -> bool:
-        """Return True if entity has to be polled for state.
-
-        False if entity pushes its state to HA.
-        """
-        return False
 
     @property
     def device_state_attributes(self):
@@ -563,11 +556,6 @@ class TNSEnergoEntity(Entity, Generic[_TAccount]):
 
     @property
     @abstractmethod
-    def icon(self) -> str:
-        raise NotImplementedError
-
-    @property
-    @abstractmethod
     def sensor_related_attributes(self) -> Optional[Mapping[str, Any]]:
         raise NotImplementedError
 
@@ -579,11 +567,6 @@ class TNSEnergoEntity(Entity, Generic[_TAccount]):
     @property
     @abstractmethod
     def unique_id(self) -> str:
-        raise NotImplementedError
-
-    @property
-    @abstractmethod
-    def device_class(self) -> Optional[str]:
         raise NotImplementedError
 
     def register_supported_services(self, for_object: Optional[Any] = None) -> None:

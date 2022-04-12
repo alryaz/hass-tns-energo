@@ -4,6 +4,7 @@ Retrieves indications regarding current state of accounts.
 """
 import logging
 import re
+from abc import ABC
 from datetime import datetime
 from typing import (
     Any,
@@ -22,6 +23,7 @@ from typing import (
 
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
+from homeassistant.components.sensor import SensorEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
     ATTR_ENTITY_ID,
@@ -79,7 +81,6 @@ _LOGGER = logging.getLogger(__name__)
 RE_HTML_TAGS = re.compile(r"<[^<]+?>")
 RE_MULTI_SPACES = re.compile(r"\s{2,}")
 
-
 INDICATIONS_MAPPING_SCHEMA = vol.Schema(
     {
         vol.Required(vol.Match(r"t\d+")): cv.positive_float,
@@ -90,7 +91,6 @@ INDICATIONS_SEQUENCE_SCHEMA = vol.All(
     vol.Any(vol.All(cv.positive_float, cv.ensure_list), [cv.positive_float]),
     lambda x: dict(map(lambda y: ("t" + str(y[0]), y[1]), enumerate(x, start=1))),
 )
-
 
 CALCULATE_PUSH_INDICATIONS_SCHEMA = vol.All(
     cv.make_entity_service_schema(
@@ -145,10 +145,18 @@ def get_supported_features(from_services: SupportedServicesType, for_object: Any
 ATTR_METER_CODES: Final = "meter_codes"
 
 
-class TNSEnergoAccount(TNSEnergoEntity):
+class TNSEnergoSensor(TNSEnergoEntity, SensorEntity, ABC):
+    pass
+
+
+class TNSEnergoAccount(TNSEnergoSensor):
     """The class for this sensor"""
 
     config_key: ClassVar[str] = CONF_ACCOUNTS
+
+    _attr_unit_of_measurement = "руб."
+    _attr_icon = "mdi:lightning-bolt-circle"
+    _attr_device_class = DOMAIN + "_account"
 
     _supported_services: ClassVar[SupportedServicesType] = {
         None: {
@@ -166,10 +174,6 @@ class TNSEnergoAccount(TNSEnergoEntity):
         return self._account.code
 
     @property
-    def device_class(self) -> Optional[str]:
-        return DOMAIN + "_account"
-
-    @property
     def unique_id(self) -> str:
         """Return the unique ID of the sensor"""
         acc = self._account
@@ -183,14 +187,6 @@ class TNSEnergoAccount(TNSEnergoEntity):
         if balance == 0.0:
             return 0.0
         return balance
-
-    @property
-    def icon(self) -> str:
-        return "mdi:lightning-bolt-circle"
-
-    @property
-    def unit_of_measurement(self) -> Optional[str]:
-        return "руб."
 
     @property
     def sensor_related_attributes(self) -> Optional[Mapping[str, Any]]:
@@ -322,10 +318,13 @@ class TNSEnergoAccount(TNSEnergoEntity):
             _LOGGER.info(self.log_prefix + "Finish handling payments retrieval")
 
 
-class TNSEnergoMeter(TNSEnergoEntity):
+class TNSEnergoMeter(TNSEnergoSensor):
     """The class for this sensor"""
 
     config_key: ClassVar[str] = CONF_METERS
+
+    _attr_icon = "mdi:counter"
+    _attr_device_class = DOMAIN + "_meter"
 
     _supported_services: ClassVar[SupportedServicesType] = {
         None: {
@@ -404,14 +403,6 @@ class TNSEnergoMeter(TNSEnergoEntity):
     @property
     def state(self) -> str:
         return self._meter.status or STATE_OK
-
-    @property
-    def icon(self):
-        return "mdi:counter"
-
-    @property
-    def device_class(self) -> Optional[str]:
-        return DOMAIN + "_meter"
 
     @property
     def sensor_related_attributes(self) -> Optional[Mapping[str, Any]]:
@@ -569,8 +560,12 @@ class TNSEnergoMeter(TNSEnergoEntity):
             _LOGGER.info(self.log_prefix + "Finish handling indications retrieval")
 
 
-class TNSEnergoLastPayment(TNSEnergoEntity):
+class TNSEnergoLastPayment(TNSEnergoSensor):
     config_key: ClassVar[str] = CONF_LAST_PAYMENT
+
+    _attr_unit_of_measurement = "руб."
+    _attr_icon = "mdi:cash-multiple"
+    _attr_device_class = DOMAIN + "_payment"
 
     def __init__(self, *args, last_payment: Optional[Payment] = None, **kwargs) -> None:
         super().__init__(*args, **kwargs)
@@ -624,14 +619,6 @@ class TNSEnergoLastPayment(TNSEnergoEntity):
         return self._last_payment.amount
 
     @property
-    def unit_of_measurement(self) -> str:
-        return "руб."
-
-    @property
-    def icon(self) -> str:
-        return "mdi:cash-multiple"
-
-    @property
     def sensor_related_attributes(self) -> Optional[Mapping[str, Any]]:
         payment = self._last_payment
 
@@ -663,10 +650,6 @@ class TNSEnergoLastPayment(TNSEnergoEntity):
         """Return the unique ID of the sensor"""
         acc = self._account
         return f"{acc.api.__class__.__name__}_lastpayment_{acc.code}"
-
-    @property
-    def device_class(self) -> Optional[str]:
-        return DOMAIN + "_payment"
 
 
 async_setup_entry = make_common_async_setup_entry(
