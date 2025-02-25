@@ -1,4 +1,5 @@
 """Energosbyt API"""
+
 __all__ = (
     "CONFIG_SCHEMA",
     "async_unload_entry",
@@ -18,20 +19,20 @@ from typing import Any, Dict, List, Mapping, Optional, Tuple
 import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.const import CONF_PASSWORD, CONF_USERNAME
+from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers import config_validation as cv
-from homeassistant.helpers.typing import ConfigType, HomeAssistantType
+from homeassistant.helpers.typing import ConfigType
 
-from custom_components.tns_energo._base import UpdateDelegatorsDataType
-from custom_components.tns_energo._schema import CONFIG_ENTRY_SCHEMA
-from custom_components.tns_energo._util import (
+from ._base import UpdateDelegatorsDataType
+from ._schema import CONFIG_ENTRY_SCHEMA
+from ._util import (
     IS_IN_RUSSIA,
     _find_existing_entry,
     _make_log_prefix,
     mask_username,
 )
-from custom_components.tns_energo.const import (
-    CONF_USER_AGENT,
+from .const import (
     DATA_API_OBJECTS,
     DATA_ENTITIES,
     DATA_FINAL_CONFIG,
@@ -55,10 +56,14 @@ def _unique_entries(value: List[Mapping[str, Any]]) -> List[Mapping[str, Any]]:
         if user in users:
             if users[user] is not None:
                 errors.append(
-                    vol.Invalid("duplicate unique key, first encounter", path=[users[user]])
+                    vol.Invalid(
+                        "duplicate unique key, first encounter", path=[users[user]]
+                    )
                 )
                 users[user] = None
-            errors.append(vol.Invalid("duplicate unique key, subsequent encounter", path=[i]))
+            errors.append(
+                vol.Invalid("duplicate unique key, subsequent encounter", path=[i])
+            )
         else:
             users[user] = i
 
@@ -74,14 +79,19 @@ CONFIG_SCHEMA = vol.Schema(
     {
         DOMAIN: vol.Any(
             vol.Equal({}),
-            vol.All(cv.ensure_list, vol.Length(min=1), [CONFIG_ENTRY_SCHEMA], _unique_entries),
+            vol.All(
+                cv.ensure_list,
+                vol.Length(min=1),
+                [CONFIG_ENTRY_SCHEMA],
+                _unique_entries,
+            ),
         )
     },
     extra=vol.ALLOW_EXTRA,
 )
 
 
-async def async_setup(hass: HomeAssistantType, config: ConfigType):
+async def async_setup(hass: HomeAssistant, config: ConfigType):
     """Set up the TNS Energo component."""
     domain_config = config.get(DOMAIN)
     if not domain_config:
@@ -156,13 +166,17 @@ async def async_setup(hass: HomeAssistantType, config: ConfigType):
 
     if not yaml_config:
         _LOGGER.debug(
-            "Конфигурация из YAML не обнаружена" if IS_IN_RUSSIA else "YAML configuration not found"
+            "Конфигурация из YAML не обнаружена"
+            if IS_IN_RUSSIA
+            else "YAML configuration not found"
         )
 
     return True
 
 
-async def async_setup_entry(hass: HomeAssistantType, config_entry: config_entries.ConfigEntry):
+async def async_setup_entry(
+    hass: HomeAssistant, config_entry: config_entries.ConfigEntry
+):
     username = config_entry.data[CONF_USERNAME]
     unique_key = username
     entry_id = config_entry.entry_id
@@ -171,7 +185,11 @@ async def async_setup_entry(hass: HomeAssistantType, config_entry: config_entrie
 
     _LOGGER.debug(
         log_prefix
-        + ("Настройка конфигурационной записи" if IS_IN_RUSSIA else "Setting up config entry")
+        + (
+            "Настройка конфигурационной записи"
+            if IS_IN_RUSSIA
+            else "Setting up config entry"
+        )
     )
 
     # Source full configuration
@@ -217,7 +235,11 @@ async def async_setup_entry(hass: HomeAssistantType, config_entry: config_entrie
 
     _LOGGER.info(
         log_prefix
-        + ("Применение конфигурационной записи" if IS_IN_RUSSIA else "Applying configuration entry")
+        + (
+            "Применение конфигурационной записи"
+            if IS_IN_RUSSIA
+            else "Applying configuration entry"
+        )
     )
 
     from tns_energo_api import TNSEnergoAPI
@@ -235,7 +257,11 @@ async def async_setup_entry(hass: HomeAssistantType, config_entry: config_entrie
         except TNSEnergoException as e:
             _LOGGER.error(
                 log_prefix
-                + ("Невозможно выполнить авторизацию" if IS_IN_RUSSIA else "Error authenticating")
+                + (
+                    "Невозможно выполнить авторизацию"
+                    if IS_IN_RUSSIA
+                    else "Error authenticating"
+                )
                 + ": "
                 + repr(e)
             )
@@ -264,7 +290,7 @@ async def async_setup_entry(hass: HomeAssistantType, config_entry: config_entrie
                         else "Received empty response to accounts request"
                     )
                 )
-            except TNSEnergoException:
+            except TNSEnergoException as e:
                 log_message = (
                     (
                         "Ошибка получения данных о лицевых счетах"
@@ -295,7 +321,8 @@ async def async_setup_entry(hass: HomeAssistantType, config_entry: config_entrie
     if not accounts:
         # Cancel setup because no accounts provided
         _LOGGER.warning(
-            log_prefix + ("Лицевые счета не найдены" if IS_IN_RUSSIA else "No accounts found")
+            log_prefix
+            + ("Лицевые счета не найдены" if IS_IN_RUSSIA else "No accounts found")
         )
         await api_object.async_close()
         return False
@@ -318,46 +345,49 @@ async def async_setup_entry(hass: HomeAssistantType, config_entry: config_entrie
     hass.data.setdefault(DATA_UPDATE_DELEGATORS, {})[entry_id] = {}
 
     # Forward entry setup to sensor platform
-    for domain in SUPPORTED_PLATFORMS:
-        hass.async_create_task(
-            hass.config_entries.async_forward_entry_setup(
-                config_entry,
-                domain,
-            )
-        )
+    await hass.config_entries.async_forward_entry_setups(
+        config_entry, SUPPORTED_PLATFORMS
+    )
 
     # Create options update listener
     update_listener = config_entry.add_update_listener(async_reload_entry)
     hass_data.setdefault(DATA_UPDATE_LISTENERS, {})[entry_id] = update_listener
 
     _LOGGER.debug(
-        log_prefix + ("Применение конфигурации успешно" if IS_IN_RUSSIA else "Setup successful")
+        log_prefix
+        + ("Применение конфигурации успешно" if IS_IN_RUSSIA else "Setup successful")
     )
     return True
 
 
 async def async_reload_entry(
-    hass: HomeAssistantType,
+    hass: HomeAssistant,
     config_entry: config_entries.ConfigEntry,
 ) -> None:
-    """Reload Lkcomu TNS Energo entry"""
+    """Reload TNS Energo entry"""
     log_prefix = _make_log_prefix(config_entry, "setup")
     _LOGGER.info(
         log_prefix
-        + ("Перезагрузка интеграции" if IS_IN_RUSSIA else "Reloading configuration entry")
+        + (
+            "Перезагрузка интеграции"
+            if IS_IN_RUSSIA
+            else "Reloading configuration entry"
+        )
     )
     await hass.config_entries.async_reload(config_entry.entry_id)
 
 
 async def async_unload_entry(
-    hass: HomeAssistantType,
+    hass: HomeAssistant,
     config_entry: config_entries.ConfigEntry,
 ) -> bool:
-    """Unload Lkcomu TNS Energo entry"""
+    """Unload TNS Energo entry"""
     log_prefix = _make_log_prefix(config_entry, "setup")
     entry_id = config_entry.entry_id
 
-    update_delegators: UpdateDelegatorsDataType = hass.data[DATA_UPDATE_DELEGATORS].pop(entry_id)
+    update_delegators: UpdateDelegatorsDataType = hass.data[DATA_UPDATE_DELEGATORS].pop(
+        entry_id
+    )
 
     tasks = [
         hass.config_entries.async_forward_entry_unload(config_entry, domain)
@@ -375,7 +405,11 @@ async def async_unload_entry(
 
         _LOGGER.info(
             log_prefix
-            + ("Интеграция выгружена" if IS_IN_RUSSIA else "Unloaded configuration entry")
+            + (
+                "Интеграция выгружена"
+                if IS_IN_RUSSIA
+                else "Unloaded configuration entry"
+            )
         )
 
     else:

@@ -6,11 +6,10 @@ from typing import Any, Callable, Coroutine, Optional, TypeVar, Union
 from homeassistant import config_entries
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_USERNAME
-from homeassistant.core import callback
+from homeassistant.core import callback, HomeAssistant
 from homeassistant.helpers.entity_platform import EntityPlatform
-from homeassistant.helpers.typing import HomeAssistantType
 
-from custom_components.tns_energo.const import DOMAIN
+from .const import DOMAIN
 from tns_energo_api import TNSEnergoAPI
 from tns_energo_api.exceptions import EmptyResultException, TNSEnergoException
 
@@ -34,7 +33,7 @@ def _make_log_prefix(
 
 @callback
 def _find_existing_entry(
-    hass: HomeAssistantType, username: str
+    hass: HomeAssistant, username: str
 ) -> Optional[config_entries.ConfigEntry]:
     existing_entries = hass.config_entries.async_entries(DOMAIN)
     for config_entry in existing_entries:
@@ -53,7 +52,9 @@ def mask_username(username: str):
 LOCAL_TIMEZONE = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
 
 # Kaliningrad is excluded as it is not supported
-IS_IN_RUSSIA = timedelta(hours=3) <= LOCAL_TIMEZONE.utcoffset(None) <= timedelta(hours=12)
+IS_IN_RUSSIA = (
+    timedelta(hours=3) <= LOCAL_TIMEZONE.utcoffset(None) <= timedelta(hours=12)
+)
 
 
 _T = TypeVar("_T")
@@ -61,7 +62,10 @@ _RT = TypeVar("_RT")
 
 
 async def with_auto_auth(
-    api: "TNSEnergoAPI", async_getter: Callable[..., Coroutine[Any, Any, _RT]], *args, **kwargs
+    api: "TNSEnergoAPI",
+    async_getter: Callable[..., Coroutine[Any, Any, _RT]],
+    *args,
+    **kwargs,
 ) -> _RT:
     try:
         return await async_getter(*args, **kwargs)

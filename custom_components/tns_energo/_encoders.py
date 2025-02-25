@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING
 
 from homeassistant.const import ATTR_CODE
 
-from custom_components.tns_energo.const import (
+from .const import (
     ATTR_ACCOUNT_CODE,
     ATTR_ADDRESS,
     ATTR_AMOUNT,

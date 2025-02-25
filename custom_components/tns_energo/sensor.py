@@ -1,7 +1,8 @@
 """
-Sensor for Inter RAO cabinet.
+Sensor for TNS Energo cabinet.
 Retrieves indications regarding current state of accounts.
 """
+
 import logging
 import re
 from abc import ABC
@@ -32,19 +33,19 @@ from homeassistant.const import (
 )
 from homeassistant.helpers.typing import ConfigType, StateType
 
-from custom_components.tns_energo._base import (
+from ._base import (
     SupportedServicesType,
     TNSEnergoEntity,
     make_common_async_setup_entry,
 )
-from custom_components.tns_energo._encoders import (
+from ._encoders import (
     account_to_attrs,
     indication_to_attrs,
     meter_to_attrs,
     payment_to_attrs,
 )
-from custom_components.tns_energo._util import with_auto_auth
-from custom_components.tns_energo.const import (
+from ._util import with_auto_auth
+from .const import (
     ATTR_ACCOUNT_CODE,
     ATTR_ADDRESS,
     ATTR_AMOUNT,
@@ -130,7 +131,9 @@ SERVICE_GET_INDICATIONS: Final = "get_indications"
 _TTNSEnergoEntity = TypeVar("_TTNSEnergoEntity", bound=TNSEnergoEntity)
 
 
-def get_supported_features(from_services: SupportedServicesType, for_object: Any) -> int:
+def get_supported_features(
+    from_services: SupportedServicesType, for_object: Any
+) -> int:
     features = 0
     for type_feature, services in from_services.items():
         if type_feature is None:
@@ -167,7 +170,7 @@ class TNSEnergoAccount(TNSEnergoSensor):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, *kwargs)
 
-        self.entity_id: Optional[str] = f"sensor." + self.entity_id_prefix + "_account"
+        self.entity_id: Optional[str] = "sensor." + self.entity_id_prefix + "_account"
 
     @property
     def code(self) -> str:
@@ -309,7 +312,9 @@ class TNSEnergoAccount(TNSEnergoSensor):
             event_data[ATTR_SUCCESS] = True
 
         finally:
-            _LOGGER.debug(self.log_prefix + "Payments retrieval event: " + str(event_data))
+            _LOGGER.debug(
+                self.log_prefix + "Payments retrieval event: " + str(event_data)
+            )
             self.hass.bus.async_fire(
                 event_type=DOMAIN + "_" + SERVICE_GET_PAYMENTS,
                 event_data=event_data,
@@ -338,7 +343,9 @@ class TNSEnergoMeter(TNSEnergoSensor):
         super().__init__(*args, **kwargs)
         self._meter = meter
 
-        self.entity_id: Optional[str] = f"sensor." + self.entity_id_prefix + "_meter_" + meter.code
+        self.entity_id: Optional[str] = (
+            "sensor." + self.entity_id_prefix + "_meter_" + meter.code
+        )
 
     #################################################################################
     # Implementation base of inherent class
@@ -435,7 +442,9 @@ class TNSEnergoMeter(TNSEnergoSensor):
     # Additional functionality
     #################################################################################
 
-    def _get_real_indications(self, call_data: Mapping) -> Mapping[str, Union[int, float]]:
+    def _get_real_indications(
+        self, call_data: Mapping
+    ) -> Mapping[str, Union[int, float]]:
         indications: Mapping[str, Union[int, float]] = call_data[ATTR_INDICATIONS]
         meter_zones = self._meter.zones
 
@@ -501,7 +510,9 @@ class TNSEnergoMeter(TNSEnergoSensor):
             self.async_schedule_update_ha_state(force_refresh=True)
 
         finally:
-            _LOGGER.debug(self.log_prefix + "Indications push event: " + str(event_data))
+            _LOGGER.debug(
+                self.log_prefix + "Indications push event: " + str(event_data)
+            )
             self.hass.bus.async_fire(
                 event_type=DOMAIN + "_" + SERVICE_PUSH_INDICATIONS,
                 event_data=event_data,
@@ -551,7 +562,9 @@ class TNSEnergoMeter(TNSEnergoSensor):
             event_data[ATTR_SUCCESS] = True
 
         finally:
-            _LOGGER.debug(self.log_prefix + "Indications retrieval event: " + str(event_data))
+            _LOGGER.debug(
+                self.log_prefix + "Indications retrieval event: " + str(event_data)
+            )
             self.hass.bus.async_fire(
                 event_type=DOMAIN + "_" + SERVICE_GET_INDICATIONS,
                 event_data=event_data,
@@ -570,7 +583,9 @@ class TNSEnergoLastPayment(TNSEnergoSensor):
     def __init__(self, *args, last_payment: Optional[Payment] = None, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self._last_payment = last_payment
-        self.entity_id: Optional[str] = f"sensor." + self.entity_id_prefix + "_last_payment"
+        self.entity_id: Optional[str] = (
+            "sensor." + self.entity_id_prefix + "_last_payment"
+        )
 
     #################################################################################
     # Implementation base of inherent class

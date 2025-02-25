@@ -268,3 +268,14 @@ data_template:
 target:
   entity_id: sensor.1243145122_meter_123456789
 ```
+
+## Разработка
+
+### Pre-commit hook
+
+Для использования pre-commit hook по мотивам [boralyl/cookiecutter-homeassistant-component](https://github.com/boralyl/cookiecutter-homeassistant-component):
+
+```shell
+pip install pre-commit
+pre-commit install
+```

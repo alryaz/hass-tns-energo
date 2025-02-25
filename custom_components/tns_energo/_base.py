@@ -36,15 +36,21 @@ from typing import (
 from urllib.parse import urlparse
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import ATTR_ATTRIBUTION, CONF_DEFAULT, CONF_SCAN_INTERVAL, CONF_USERNAME
+from homeassistant.const import (
+    ATTR_ATTRIBUTION,
+    CONF_DEFAULT,
+    CONF_SCAN_INTERVAL,
+    CONF_USERNAME,
+)
 from homeassistant.helpers import entity_platform
+from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.event import async_track_time_interval
-from homeassistant.helpers.typing import ConfigType, HomeAssistantType, StateType
+from homeassistant.helpers.typing import ConfigType, StateType
 from homeassistant.util import as_local, utcnow
 
-from custom_components.tns_energo._util import IS_IN_RUSSIA, mask_username, with_auto_auth
-from custom_components.tns_energo.const import (
+from ._util import IS_IN_RUSSIA, mask_username, with_auto_auth
+from .const import (
     ATTRIBUTION_EN,
     ATTRIBUTION_RU,
     ATTR_ACCOUNT_CODE,
@@ -73,8 +79,10 @@ _LOGGER = logging.getLogger(__name__)
 
 _TTNSEnergoEntity = TypeVar("_TTNSEnergoEntity", bound="TNSEnergoEntity")
 
-AddEntitiesCallType = Callable[[List["MESEntity"], bool], Any]
-UpdateDelegatorsDataType = Dict[str, Tuple[AddEntitiesCallType, Set[Type["MESEntity"]]]]
+AddEntitiesCallType = Callable[[List["TNSEnergoEntity"], bool], Any]
+UpdateDelegatorsDataType = Dict[
+    str, Tuple[AddEntitiesCallType, Set[Type["TNSEnergoEntity"]]]
+]
 EntitiesDataType = Dict[Type["TNSEnergoEntity"], Dict[Hashable, "TNSEnergoEntity"]]
 
 
@@ -82,7 +90,7 @@ def make_common_async_setup_entry(
     entity_cls: Type["TNSEnergoEntity"], *args: Type["TNSEnergoEntity"]
 ):
     async def _async_setup_entry(
-        hass: HomeAssistantType,
+        hass: HomeAssistant,
         config_entry: ConfigEntry,
         async_add_devices,
     ):
@@ -116,7 +124,7 @@ def make_common_async_setup_entry(
 
 
 async def async_register_update_delegator(
-    hass: HomeAssistantType,
+    hass: HomeAssistant,
     config_entry: ConfigEntry,
     platform: str,
     async_add_entities: AddEntitiesCallType,
@@ -126,7 +134,9 @@ async def async_register_update_delegator(
 ):
     entry_id = config_entry.entry_id
 
-    update_delegators: UpdateDelegatorsDataType = hass.data[DATA_UPDATE_DELEGATORS][entry_id]
+    update_delegators: UpdateDelegatorsDataType = hass.data[DATA_UPDATE_DELEGATORS][
+        entry_id
+    ]
     update_delegators[platform] = (async_add_entities, {entity_cls, *args})
 
     if update_after_complete:
@@ -139,10 +149,12 @@ async def async_register_update_delegator(
 DEV_CLASSES_PROCESSED = set()
 
 
-async def async_refresh_api_data(hass: HomeAssistantType, config_entry: ConfigEntry):
+async def async_refresh_api_data(hass: HomeAssistant, config_entry: ConfigEntry):
     entry_id = config_entry.entry_id
 
-    update_delegators: UpdateDelegatorsDataType = hass.data[DATA_UPDATE_DELEGATORS][entry_id]
+    update_delegators: UpdateDelegatorsDataType = hass.data[DATA_UPDATE_DELEGATORS][
+        entry_id
+    ]
 
     log_prefix_base = f"[{mask_username(config_entry.data[CONF_USERNAME])}]"
     refresh_log_prefix = log_prefix_base + "[refresh] "
@@ -195,7 +207,9 @@ async def async_refresh_api_data(hass: HomeAssistantType, config_entry: ConfigEn
 
     for account in accounts:
         account_config = accounts_config.get(account.code)
-        account_log_prefix_base = refresh_log_prefix + f"[{mask_username(account.code)}]"
+        account_log_prefix_base = (
+            refresh_log_prefix + f"[{mask_username(account.code)}]"
+        )
 
         if account_config is None:
             account_config = account_default_config
@@ -206,15 +220,17 @@ async def async_refresh_api_data(hass: HomeAssistantType, config_entry: ConfigEn
         for platform, (async_add_entities, entity_classes) in update_delegators.items():
             platform_log_prefix_base = account_log_prefix_base + f"[{platform}]"
             for entity_cls in entity_classes:
-                cls_log_prefix_base = platform_log_prefix_base + f"[{entity_cls.__name__}]"
+                cls_log_prefix_base = (
+                    platform_log_prefix_base + f"[{entity_cls.__name__}]"
+                )
                 if account_config[entity_cls.config_key] is False:
                     _LOGGER.debug(
                         log_prefix_base
                         + " "
                         + (
-                            f"Лицевой счёт пропущен согласно фильтрации"
+                            "Лицевой счёт пропущен согласно фильтрации"
                             if IS_IN_RUSSIA
-                            else f"Account skipped due to filtering"
+                            else "Account skipped due to filtering"
                         )
                     )
                     continue
@@ -337,7 +353,9 @@ class TNSEnergoEntity(Entity, Generic[_TAccount]):
 
         return {
             "name": f"№ {account_object.code}",
-            "identifiers": {(DOMAIN, f"{account_object.api.region}__{account_object.code}")},
+            "identifiers": {
+                (DOMAIN, f"{account_object.api.region}__{account_object.code}")
+            },
             "manufacturer": "TNS Energo",
             "model": self.api_hostname,
             # "suggested_area": account_object.address,
@@ -393,7 +411,7 @@ class TNSEnergoEntity(Entity, Generic[_TAccount]):
     #################################################################################
 
     @property
-    def device_state_attributes(self):
+    def extra_state_attributes(self):
         """Return the attribute(s) of the sensor"""
 
         attributes = {
@@ -451,7 +469,9 @@ class TNSEnergoEntity(Entity, Generic[_TAccount]):
         if registry_entry:
             entry_id: Optional[str] = registry_entry.config_entry_id
             if entry_id:
-                data_entities: EntitiesDataType = self.hass.data[DATA_ENTITIES][entry_id]
+                data_entities: EntitiesDataType = self.hass.data[DATA_ENTITIES][
+                    entry_id
+                ]
                 cls_entities = data_entities.get(self.__class__)
                 if cls_entities:
                     remove_indices = []
@@ -473,7 +493,11 @@ class TNSEnergoEntity(Entity, Generic[_TAccount]):
         if self._entity_updater is not None:
             _LOGGER.debug(
                 self.log_prefix
-                + ("Остановка планировщика обновлений" if IS_IN_RUSSIA else "Stopping updater")
+                + (
+                    "Остановка планировщика обновлений"
+                    if IS_IN_RUSSIA
+                    else "Stopping updater"
+                )
             )
             self._entity_updater()
             self._entity_updater = None

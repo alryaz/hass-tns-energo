@@ -1,4 +1,5 @@
 push_indications:
+  name: 'Передать показания'
   description: 'Передать показания в личный кабинет'
   target:
     entity:
@@ -6,6 +7,7 @@ push_indications:
       device_class: tns_energo_meter
   fields:
     indications:
+      name: 'Список показаний'
       description: 'Список показаний (от 1 до 3) для тарифов: T1, T2, T3'
       required: true
       advanced: false
@@ -14,6 +16,7 @@ push_indications:
         text:
           multiline: false
     incremental:
+      name: 'Сложить известные переданные показания'
       description: 'Сложить известные переданные показания счётчика с передаваемыми'
       required: false
       advanced: false
@@ -22,6 +25,7 @@ push_indications:
       selector:
         boolean:
     notification:
+      name: 'Показывать уведомление'
       description: 'Показывать уведомление при успешной передаче'
       required: false
       advanced: false
@@ -30,6 +34,7 @@ push_indications:
       selector:
         boolean:
     ignore_indications:
+      name: 'Игнорировать ограничения'
       description: 'Игнорировать ограничения по показаниям'
       required: false
       advanced: true
@@ -39,6 +44,7 @@ push_indications:
         boolean:
 
 calculate_indications:
+  name: 'Подсчитать начисления'
   description: 'Подсчитать начисления по передаваемым показаниям'
   target:
     entity:
@@ -46,6 +52,7 @@ calculate_indications:
       device_class: tns_energo_meter
   fields:
     indications:
+      name: 'Список показаний'
       description: 'Список показаний (от 1 до 3) для тарифов: T1, T2, T3'
       required: true
       advanced: false
@@ -54,6 +61,7 @@ calculate_indications:
         text:
           multiline: false
     incremental:
+      name: 'Сложить известные переданные показания'
       description: 'Сложить известные переданные показания счётчика с передаваемыми'
       required: false
       advanced: false
@@ -62,6 +70,7 @@ calculate_indications:
       selector:
         boolean:
     notification:
+      name: 'Показывать уведомление'
       description: 'Показывать уведомление при успешной передаче'
       required: false
       advanced: false
@@ -70,6 +79,7 @@ calculate_indications:
       selector:
         boolean:
     ignore_indications:
+      name: 'Игнорировать ограничения'
       description: 'Игнорировать ограничения по показаниям'
       required: false
       advanced: true
@@ -80,6 +90,7 @@ calculate_indications:
 
 
 set_description:
+  name: "Задать комментарий к лицевому счёту"
   description: "Задать комментарий к лицевому счёту. Пустой параметр `description` (или его упущение) очистит описание к лицевому счёту."
   target:
     entity:
@@ -87,6 +98,7 @@ set_description:
       device_class: tns_energo_account
   fields:
     description:
+      name: 'Описание'
       description: 'Описание'
       required: false
       advanced: false
@@ -95,6 +107,7 @@ set_description:
           multiline: false
 
 get_payments:
+  name: "Получить перечень платежей"
   description: "Получить перечень платежей, связанных с лицевым счётом, которые находятся внутри заданного периода"
   target:
     entity:
@@ -102,6 +115,7 @@ get_payments:
       device_class: tns_energo_account
   fields:
     start:
+      name: "Начало"
       description: "Дата начала периода"
       required: false
       advanced: false
@@ -109,6 +123,7 @@ get_payments:
         text:
           multiline: false
     end:
+      name: "Окончание"
       description: "Дата окончания периода"
       required: false
       advanced: false
@@ -117,6 +132,7 @@ get_payments:
           multiline: false
 
 get_indications:
+  name: "Получить перечень квитанций"
   description: "Получить перечень квитанций, связанных с счётчиком (-ами), которые находятся внутри заданного периода"
   target:
     entity:
@@ -124,6 +140,7 @@ get_indications:
       device_class: tns_energo_meter
   fields:
     start:
+      name: "Начало"
       description: "Дата начала периода"
       required: false
       advanced: false
@@ -131,6 +148,7 @@ get_indications:
         text:
           multiline: false
     end:
+      name: "Окончание"
       description: "Дата окончания периода"
       required: false
       advanced: false
@@ -138,6 +156,7 @@ get_indications:
         text:
           multiline: false
     meter_codes:
+      name: "Номера счётчиков"
       description: "Номера счётчиков (недоступно при использовании на счётчиках)"
       required: false
       advanced: false
