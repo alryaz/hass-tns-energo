@@ -64,7 +64,6 @@ class TNSEnergoConfigFlow(ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Inter RAO config entries."""
 
     VERSION = 1
-    CONNECTION_CLASS = config_entries.CONN_CLASS_CLOUD_POLL
 
     CACHED_API_TYPE_NAMES: ClassVar[Optional[Dict[str, Any]]] = {}
 

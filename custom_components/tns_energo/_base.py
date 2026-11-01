@@ -40,7 +40,8 @@ from homeassistant.const import ATTR_ATTRIBUTION, CONF_DEFAULT, CONF_SCAN_INTERV
 from homeassistant.helpers import entity_platform
 from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.event import async_track_time_interval
-from homeassistant.helpers.typing import ConfigType, HomeAssistantType, StateType
+from homeassistant.core import HomeAssistant as HomeAssistantType
+from homeassistant.helpers.typing import ConfigType, StateType
 from homeassistant.util import as_local, utcnow
 
 from custom_components.tns_energo._util import IS_IN_RUSSIA, mask_username, with_auto_auth
@@ -393,7 +394,7 @@ class TNSEnergoEntity(Entity, Generic[_TAccount]):
     #################################################################################
 
     @property
-    def device_state_attributes(self):
+    def extra_state_attributes(self):
         """Return the attribute(s) of the sensor"""
 
         attributes = {

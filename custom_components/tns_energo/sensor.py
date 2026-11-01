@@ -154,7 +154,7 @@ class TNSEnergoAccount(TNSEnergoSensor):
 
     config_key: ClassVar[str] = CONF_ACCOUNTS
 
-    _attr_unit_of_measurement = "руб."
+    _attr_native_unit_of_measurement = "руб."
     _attr_icon = "mdi:lightning-bolt-circle"
     _attr_device_class = DOMAIN + "_account"
 
@@ -563,7 +563,7 @@ class TNSEnergoMeter(TNSEnergoSensor):
 class TNSEnergoLastPayment(TNSEnergoSensor):
     config_key: ClassVar[str] = CONF_LAST_PAYMENT
 
-    _attr_unit_of_measurement = "руб."
+    _attr_native_unit_of_measurement = "руб."
     _attr_icon = "mdi:cash-multiple"
     _attr_device_class = DOMAIN + "_payment"
 
