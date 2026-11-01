@@ -6,9 +6,8 @@ from typing import Any, Callable, Coroutine, Optional, TypeVar, Union
 from homeassistant import config_entries
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_USERNAME
-from homeassistant.core import callback
+from homeassistant.core import HomeAssistant as HomeAssistantType, callback
 from homeassistant.helpers.entity_platform import EntityPlatform
-from homeassistant.helpers.typing import HomeAssistantType
 
 from custom_components.tns_energo.const import DOMAIN
 from tns_energo_api import TNSEnergoAPI
